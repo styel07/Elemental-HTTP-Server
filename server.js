@@ -28,6 +28,11 @@ var server = http.createServer(function(request, response) {
     // parses the input from the browser
     var inputFromBrowser = url.parse(request.url);
 
+    // checks if file exists
+    fs.exists('./public' + inputFromBrowser.path, function (exists) {
+      console.log(exists ? 'it\'s there' : 'error file does not exist');
+    });
+
     // read files
     fs.readFile('./public' + inputFromBrowser.path, function(err,data) {
       // returns the 404.html
@@ -39,8 +44,20 @@ var server = http.createServer(function(request, response) {
         response.end(data.toString());
       }
     });
+
   });
 
+// create files [POST]
+// Write code
+
+  if (request.method === 'POST') {
+    // creates styles.css
+    fs.writeFile(inputFromBrowser, 'ello', function(err) {
+      if (err) throw new Error('Could not write new file: ' + error.message);
+      console.log('Done writing to styles.css');
+      response.end('finish writing file!');
+    });
+  }
 
 });
 
@@ -51,25 +68,6 @@ server.listen(PORT, function() {
 
 console.log('complete');
 
-// create files [POST]
-// Write code
-  // checks if directory exists
-  //fs.exists('/css', function (exists) {
-  //console.log(exists ? 'it\'s there' : 'no passwd!');
-  // fs.mkdirSync('public/css');
-  // make directory css
-  //});
-
-// var filename = 'public/css/styles.css';
-
-// if (request.url === '/') {
-//   // creates styles.css
-//   fs.writeFile(filename, stylesContents, function(err) {
-//     if (err) throw new Error('Could not write to styles.css: ' + error.message);
-//     console.log('Done writing to styles.css');
-//     response.end('finish writing file!');
-//   });
-//}
 
 // // creates helium.html
 // fs.write('helium.html', heliumContents, function(err) {
