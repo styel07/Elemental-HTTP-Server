@@ -24,39 +24,51 @@ var server = http.createServer(function(request, response) {
     console.log(dataBuffer);
   });
 
-  request.on('end', function() {
+  if (request.method === 'GET') {
+    // do get methods here
+
+    request.on('end', function() {
     // parses the input from the browser
     var inputFromBrowser = url.parse(request.url);
 
-    // checks if file exists
-    fs.exists('./public' + inputFromBrowser.path, function (exists) {
-      console.log(exists ? 'it\'s there' : 'error file does not exist');
+      // checks if file exists
+      fs.exists('./public' + inputFromBrowser.path, function (exists) {
+        console.log(exists ? 'it\'s there' : 'error file does not exist');
+      });
+
+      // read files
+      fs.readFile('./public' + inputFromBrowser.path, function(err,data) {
+        if (err) {
+          // returns the 404.html if server could not find path
+          fs.readFile('./public/404.html', function(err2, data2) {
+            response.end(data2.toString());
+          });
+        } else {
+          response.end(data.toString());
+        }
+      });
     });
+  }
 
-    // read files
-    fs.readFile('./public' + inputFromBrowser.path, function(err,data) {
-      // returns the 404.html
-      if (err) {
-        fs.readFile('./public/404.html', function(err2, data2) {
-          response.end(data2.toString());
-        });
-      } else {
-        response.end(data.toString());
-      }
-    });
-
-  });
-
-// create files [POST]
-// Write code
+  // create files [POST]
+  // Write code
 
   if (request.method === 'POST') {
-    // creates styles.css
-    fs.writeFile(inputFromBrowser, 'ello', function(err) {
-      if (err) throw new Error('Could not write new file: ' + error.message);
-      console.log('Done writing to styles.css');
-      response.end('finish writing file!');
-    });
+    // do post methods here
+    if (request.url === '/element') {
+
+      // creates file
+      request.on('end', function() {
+        var data = qs.parse(dataBuffer.toString());
+        var dataToHTML = '<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8"> <title>' + data.elementName + '</title> <link rel="stylesheet" href="/css/styles.css"> </head> <body> <h1>'+ data.elementName +'</h1> <h2>'+ data.elementSymbol +'</h2> <h3>Atomic number '+ data.elementAtomicNumber+'</h3> <p>'+ data.elementDescription +'</p> <p><a href="/">back</a></p> </body> </html>'
+        // write all parsed data onto a new file
+        fs.writeFile('./public/' + data.elementName + '.html', dataToHTML, function(err) {
+          if (err) throw new Error('Could not write new file: ' + error.message);
+          console.log('Done writing to ');
+          response.end('finish writing file!');
+        });
+      });
+    }
   }
 
 });
